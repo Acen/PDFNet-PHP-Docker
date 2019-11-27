@@ -40,5 +40,4 @@ RUN cd /root/PDFNet/PDFNetWrappers-$PDFNETWRAPPER_GIT_SHA1/build && \
     make && \
     make install
 
-RUN cp -r /root/PDFNet/PDFNetWrappers-$PDFNETWRAPPER_GIT_SHA1/build/lib/ /PDFNetPHP/ && \
-    rm -rf /root/PDFNet/
+RUN cp -r /root/PDFNet/PDFNetWrappers-$PDFNETWRAPPER_GIT_SHA1/build/lib/ /PDFNetPHP/

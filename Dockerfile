@@ -2,8 +2,9 @@ FROM php:7.2.25
 
 MAINTAINER zac@tuft.co.nz
 
-ENV PDFNETWRAPPER_GIT_SHA1=f649422bec6142acef3aefead83759d969b84d4f
-ENV PDFNETC64_FILE_SHA1=ff4ce82712836dcdea320c64ae006866c3ff0651
+ENV PDFNETWRAPPER_GIT_SHA1=f649422bec6142acef3aefead83759d969b84d4f \
+    PDFNETC64_FILE_SHA1=ff4ce82712836dcdea320c64ae006866c3ff0651 \
+    PDFNETOCRMODULE_FILE_SHA1=f7f051e4152a026937f120be19fae7656b885bdc
 
 # Install Dependencies
 RUN set -eux; \
@@ -13,30 +14,39 @@ RUN set -eux; \
 	    swig \
 	    cmake \
 		make && \
-	rm -rf /var/lib/apt/lists/*
+	rm -rf /var/lib/apt/lists/* && \
+	mkdir /root/PDFNet
 
-# Download Assets
-RUN mkdir /root/PDFNet && \
-    wget https://github.com/PDFTron/PDFNetWrappers/archive/$PDFNETWRAPPER_GIT_SHA1.tar.gz -P /root/PDFNet/ && \
-    cd /root/PDFNet && \
-    tar xzvf $PDFNETWRAPPER_GIT_SHA1.tar.gz && \
-    cd PDFNetWrappers-$PDFNETWRAPPER_GIT_SHA1/PDFNetC && \
-    wget http://www.pdftron.com/downloads/PDFNetC64.tar.gz && \
+WORKDIR /root/PDFNet
+# Get PDFNetWrappers
+RUN wget -nv https://github.com/PDFTron/PDFNetWrappers/archive/$PDFNETWRAPPER_GIT_SHA1.tar.gz && \
+    tar xzf $PDFNETWRAPPER_GIT_SHA1.tar.gz && \
+    echo "PDFNetWrapper downloaded to $(pwd)."
+
+# Get C Headers/Lib
+RUN cd PDFNetWrappers-$PDFNETWRAPPER_GIT_SHA1/PDFNetC && \
+    wget -nv http://www.pdftron.com/downloads/PDFNetC64.tar.gz && \
     echo "$PDFNETC64_FILE_SHA1 PDFNetC64.tar.gz" | sha1sum -c - && \
-    tar xzvf PDFNetC64.tar.gz && \
+    tar xzf PDFNetC64.tar.gz && \
     mv PDFNetC64/Headers/ . && \
     mv PDFNetC64/Lib/ . && \
-    cd .. && \
-    mkdir build
+    echo "PDFNetC64 Downloaded. /Headers and /Lib placed in $(pwd)."
+
+# Get OCR Module.
+RUN wget -nv https://www.pdftron.com/downloads/OCRModuleLinux.tar.gz && \
+    echo "$PDFNETOCRMODULE_FILE_SHA1 OCRModuleLinux.tar.gz" | sha1sum -c - && \
+    tar xzf OCRModuleLinux.tar.gz && \
+    mkdir build && \
+    echo "OCRModuleLinux downloaded to $(pwd)."
+
+WORKDIR /root/PDFNet/PDFNetWrappers-$PDFNETWRAPPER_GIT_SHA1/build
 
 # Add to Swig Interface file, so `Config` class doesn't clash with Laravel.
-RUN cd /root/PDFNet/PDFNetWrappers-$PDFNETWRAPPER_GIT_SHA1/build && \
-    sed -i "/^%rename (IsEqual) operator==;/a %rename (PDFNetConfig) Config;" "../PDFNetPHP/PDFNetPHP.i"
+RUN sed -i "/^%rename (IsEqual) operator==;/a %rename (PDFNetConfig) Config;" "../PDFNetPHP/PDFNetPHP.i"
 
 
 # Build & Install.
-RUN cd /root/PDFNet/PDFNetWrappers-$PDFNETWRAPPER_GIT_SHA1/build && \
-    cmake -D BUILD_PDFNetPHP=ON .. && \
+RUN cmake -D BUILD_PDFNetPHP=ON .. && \
     make && \
     make install
 

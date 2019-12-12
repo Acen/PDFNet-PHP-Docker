@@ -33,11 +33,14 @@ RUN cd PDFNetWrappers-$PDFNETWRAPPER_GIT_SHA1/PDFNetC && \
     echo "PDFNetC64 Downloaded. /Headers and /Lib placed in $(pwd)."
 
 # Get OCR Module.
-RUN wget -nv https://www.pdftron.com/downloads/OCRModuleLinux.tar.gz && \
+RUN mkdir OCR && \
+    cd OCR && \
+    wget -nv https://www.pdftron.com/downloads/OCRModuleLinux.tar.gz && \
     echo "$PDFNETOCRMODULE_FILE_SHA1 OCRModuleLinux.tar.gz" | sha1sum -c - && \
     tar xzf OCRModuleLinux.tar.gz && \
-    mkdir build && \
-    echo "OCRModuleLinux downloaded to $(pwd)."
+    rm -f OCRModuleLinux.tar.gz && \
+    echo "OCRModuleLinux downloaded to $(pwd)." && \
+    mkdir build
 
 WORKDIR /root/PDFNet/PDFNetWrappers-$PDFNETWRAPPER_GIT_SHA1/build
 
@@ -51,5 +54,4 @@ RUN cmake -D BUILD_PDFNetPHP=ON .. && \
     make install
 
 RUN cp -r /root/PDFNet/PDFNetWrappers-$PDFNETWRAPPER_GIT_SHA1/build/lib/ /PDFNetPHP/ && \
-    cp -r /root/PDFNet/PDFNetWrappers-$PDFNETWRAPPER_GIT_SHA1/PDFNetC/Lib/ /PDFNetPHP/Lib && \
-    cp -r /root/PDFNet/PDFNetWrappers-$PDFNETWRAPPER_GIT_SHA1/Samples/ /PDFNetPHP/Samples/
+    cp /root/PDFNet/PDFNetWrappers-$PDFNETWRAPPER_GIT_SHA1/PDFNetC/Lib/libPDFNetC.so.7.0.1 /PDFNetPHP/libPDFNetC.so

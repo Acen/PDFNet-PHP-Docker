@@ -4,9 +4,10 @@ Builds PHP `.so` extension and `.php` library.
 
 
 * Built using PHP `7.2.25`
-* PDFNetWrapper git SHA1 `f649422bec6142acef3aefead83759d969b84d4f`
-* PDFNetC64.tar.gz sha1 `ff4ce82712836dcdea320c64ae006866c3ff0651`
-
+* PDFNetWrapper git SHA1 `b97b37977d91de9803dd671c243e58401cccb96d`
+* PDFNetC64.tar.gz SHA1 `b7465ad2ef4703f0a31af2181bf594e76a21f058`
+* OCRModule SHA1 `f7f051e4152a026937f120be19fae7656b885bdc`
+* PDFNet Version `7.0.4`
 
 Output is located in `/PDFNetPHP` folder.
 

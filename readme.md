@@ -20,7 +20,20 @@ FROM tuft/pdfnet-php:latest as PDFNetPHP
 
 
 FROM your-normal-image
-COPY --from=PDFNetPHP /PDFNetPHP /blah
+COPY --from=PDFNetPHP /PDFNetPHP/libPDFNetC.so /usr/lib/libPDFNetC.so
+COPY --from=PDFNetPHP /PDFNetPHP/OCRModule /usr/lib/OCRModule
+COPY --from=PDFNetPHP /PDFNetPHP/PDFNetPHP.so /usr/lib/php/20170718/PDFNetPHP.so
+
+COPY config/pdfnetphp.ini /etc/php/7.2/mods-available/pdfnetphp.ini
+RUN ln -s /etc/php/7.2/mods-available/pdfnetphp.ini /etc/php/7.2/cli/conf.d/10-pdfnetphp.ini && \
+    ln -s /etc/php/7.2/mods-available/pdfnetphp.ini /etc/php/7.2/apache2/conf.d/10-pdfnetphp.ini
+```
+
+config/pdfnetphp.ini
+```ini
+; priority=10
+extension=PDFNetPHP.so
+
 ```
 
 ### License

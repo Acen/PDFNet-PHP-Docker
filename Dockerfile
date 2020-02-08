@@ -2,9 +2,10 @@ FROM php:7.2.25
 
 MAINTAINER zac@tuft.co.nz
 
-ENV PDFNETWRAPPER_GIT_SHA1=f649422bec6142acef3aefead83759d969b84d4f \
-    PDFNETC64_FILE_SHA1=ff4ce82712836dcdea320c64ae006866c3ff0651 \
-    PDFNETOCRMODULE_FILE_SHA1=f7f051e4152a026937f120be19fae7656b885bdc
+ENV PDFNETWRAPPER_GIT_SHA1=b97b37977d91de9803dd671c243e58401cccb96d \
+    PDFNETC64_FILE_SHA1=b7465ad2ef4703f0a31af2181bf594e76a21f058 \
+    PDFNETOCRMODULE_FILE_SHA1=f7f051e4152a026937f120be19fae7656b885bdc \
+    PDFNET_VERSION=7.0.4
 
 # Install Dependencies
 RUN set -eux; \
@@ -38,7 +39,6 @@ RUN mkdir OCR && \
     wget -nv https://www.pdftron.com/downloads/OCRModuleLinux.tar.gz && \
     echo "$PDFNETOCRMODULE_FILE_SHA1 OCRModuleLinux.tar.gz" | sha1sum -c - && \
     tar xzf OCRModuleLinux.tar.gz && \
-    rm -f OCRModuleLinux.tar.gz && \
     echo "OCRModuleLinux downloaded to $(pwd)." && \
     mkdir build
 
@@ -54,4 +54,8 @@ RUN cmake -D BUILD_PDFNetPHP=ON .. && \
     make install
 
 RUN cp -r /root/PDFNet/PDFNetWrappers-$PDFNETWRAPPER_GIT_SHA1/build/lib/ /PDFNetPHP/ && \
-    cp /root/PDFNet/PDFNetWrappers-$PDFNETWRAPPER_GIT_SHA1/PDFNetC/Lib/libPDFNetC.so.7.0.1 /PDFNetPHP/libPDFNetC.so
+    cp /root/PDFNet/PDFNetWrappers-$PDFNETWRAPPER_GIT_SHA1/PDFNetC/Lib/libPDFNetC.so.$PDFNET_VERSION /PDFNetPHP/libPDFNetC.so && \
+    cp /root/PDFNet/OCR/Lib/OCRModule /PDFNetPHP/OCRModule
+
+COPY test_sha1.sh /test_sha1.sh
+RUN chmod 777 /test_sha1.sh
